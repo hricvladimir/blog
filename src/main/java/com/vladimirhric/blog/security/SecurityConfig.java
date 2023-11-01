@@ -26,11 +26,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((request) -> {request
+        http.authorizeHttpRequests((request) -> request
                 .requestMatchers(HttpMethod.GET).permitAll()  // permit all GET requests (will change later)
                 .anyRequest()
-                .authenticated();
-        });
+                .authenticated());
 
         http.httpBasic(Customizer.withDefaults());
 
