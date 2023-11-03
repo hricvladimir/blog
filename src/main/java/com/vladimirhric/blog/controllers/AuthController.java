@@ -1,5 +1,6 @@
 package com.vladimirhric.blog.controllers;
 
+import com.vladimirhric.blog.dto.LoginDto;
 import com.vladimirhric.blog.dto.RegisterDto;
 import com.vladimirhric.blog.models.Role;
 import com.vladimirhric.blog.models.UserEntity;
@@ -11,7 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,9 +42,24 @@ public class AuthController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDto loginDto) throws UsernameNotFoundException {
+        Authentication authentication = null;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginDto.getUsername(),
+                            loginDto.getPassword()));
+        } catch (Exception e) {
+            return new ResponseEntity<>("User was not logged in.", HttpStatus.BAD_REQUEST);
+
+        }
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return new ResponseEntity<>("User logged in successfuly.", HttpStatus.OK);
+    }
+
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) throws RoleNotFoundException {
-        System.out.println("INSIDE");
         if(userRepository.existsByUsername(registerDto.getUsername())) {
             return new ResponseEntity<>("This username already exists.", HttpStatus.BAD_REQUEST);
         }
@@ -54,7 +74,4 @@ public class AuthController {
         userRepository.save(user);
         return new ResponseEntity<>("User created successfully.", HttpStatus.OK);
     }
-
-
-
 }
