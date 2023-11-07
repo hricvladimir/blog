@@ -27,7 +27,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @ComponentScan
 public class SecurityConfig {
 
-    private JwtAuthEntryPoint authEntryPoint;
+    private final JwtAuthEntryPoint authEntryPoint;
     CustomUserDetailsService customUserDetailsService;
 
     @Autowired
