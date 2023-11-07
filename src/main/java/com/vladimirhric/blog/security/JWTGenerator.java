@@ -29,7 +29,7 @@ public class JWTGenerator {
                 .subject(username)
                 .issuedAt(new Date())
                 .expiration(expireDate)
-                .signWith(Keys.hmacShaKeyFor(secretKeyBytes), SignatureAlgorithm.HS512)
+                .signWith(Keys.hmacShaKeyFor(secretKeyBytes), SignatureAlgorithm.HS512) // DEPRECATED :(
                 .compact();
     }
 
