@@ -1,11 +1,13 @@
 package com.vladimirhric.blog.controllers;
 
+import com.vladimirhric.blog.dto.AuthResponseDto;
 import com.vladimirhric.blog.dto.LoginDto;
 import com.vladimirhric.blog.dto.RegisterDto;
 import com.vladimirhric.blog.models.Role;
 import com.vladimirhric.blog.models.UserEntity;
 import com.vladimirhric.blog.repository.RoleRepository;
 import com.vladimirhric.blog.repository.UserRepository;
+import com.vladimirhric.blog.security.JWTGenerator;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,17 +35,23 @@ public class AuthController {
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
+    private JWTGenerator jwtGenerator;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(AuthenticationManager authenticationManager,
+                          UserRepository userRepository,
+                          RoleRepository roleRepository,
+                          PasswordEncoder passwordEncoder,
+                          JWTGenerator jwtGenerator) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtGenerator = jwtGenerator;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginDto loginDto) throws UsernameNotFoundException {
+    public ResponseEntity<AuthResponseDto> login(@RequestBody LoginDto loginDto) throws UsernameNotFoundException {
         Authentication authentication = null;
         try {
             authentication = authenticationManager.authenticate(
@@ -51,11 +59,12 @@ public class AuthController {
                             loginDto.getUsername(),
                             loginDto.getPassword()));
         } catch (Exception e) {
-            return new ResponseEntity<>("User was not logged in.", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new ResponseEntity<>("User logged in successfuly.", HttpStatus.OK);
+        String token = jwtGenerator.generateToken(authentication);
+        return new ResponseEntity<>(new AuthResponseDto(token), HttpStatus.OK);
     }
 
     @PostMapping("/register")

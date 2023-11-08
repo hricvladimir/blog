@@ -18,6 +18,9 @@ import static com.vladimirhric.blog.security.SecurityConstants.JWT_SECRET;
 
 @Component
 public class JWTGenerator {
+
+
+
     public String generateToken(Authentication authentication) {
         String username = authentication.getName();
         Date currentDate = new Date();
